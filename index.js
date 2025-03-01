@@ -29,19 +29,19 @@ app.use((req, res, next) => {
 
     next();
 });
-// app.use(cors({
-//     origin: 'e-com-system.netlify.app',
-//     methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
-//     allowedHeaders: [
-//         "Content-Type",
-//         "Authorization",
-//         "Cache-Control",
-//         "Expires",
-//         "Pragma",
-//     ],
-//     credentials: true,
-// }));
-// app.options("*", cors());
+app.use(cors({
+    origin: 'e-com-system.netlify.app',
+    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+    allowedHeaders: [
+        "Content-Type",
+        "Authorization",
+        "Cache-Control",
+        "Expires",
+        "Pragma",
+    ],
+    credentials: true,
+}));
+app.options("*", cors());
 app.use(cookieParser());
 
 // Route mặc định

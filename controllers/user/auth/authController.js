@@ -139,7 +139,7 @@ const login = async (req, res, next) => {
         res.cookie('token', token, {
             httpOnly: true,
             secure: true, 
-            domain: '.onrender.com',
+            domain: 'be-ecom-system.onrender.com',
             sameSite: 'None',
             path: '/',
         }).json({
