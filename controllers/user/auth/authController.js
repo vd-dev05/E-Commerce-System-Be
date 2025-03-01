@@ -138,7 +138,7 @@ const login = async (req, res, next) => {
 
         res.cookie('token', token, {
             httpOnly: true,
-            secure: false,
+            secure: true, 
             domain: '.onrender.com',
             sameSite: 'None',
             path: '/',
