@@ -4,11 +4,11 @@ import UserModel from '../../../models/auth/userModel.js';
 import responseServer from '../../../services/configStatus.js';
 
 const register = async (req, res) => {
-    const { username, email, password, gender, birthday, phone ,isLoginGoogle, isPasswordSet } = req.body;
+    const { username, email, password, gender, birthday, phone, isLoginGoogle, isPasswordSet } = req.body;
 
     try {
         if (isLoginGoogle === false) {
-           
+
             const hashPassword = await bcrypt.hash(password, 10);
             const formattedBirthday = new Intl.DateTimeFormat('en-GB').format(new Date(birthday))
             const newUser = new UserModel({
@@ -16,14 +16,14 @@ const register = async (req, res) => {
                 email,
                 gender,
                 birthday: formattedBirthday,
-                phone : Number(phone),
+                phone: Number(phone),
                 password: hashPassword,
                 isActive: true,
                 last_login: Date.now(),
                 role: 'user',
                 is_temporary: false,
-                isPasswordSet : isPasswordSet  ,
-                isLoginGoogle : isLoginGoogle,
+                isPasswordSet: isPasswordSet,
+                isLoginGoogle: isLoginGoogle,
             })
             await newUser.save()
             res.json({
@@ -40,40 +40,41 @@ const register = async (req, res) => {
                 isActive: true,
                 last_login: Date.now(),
                 is_temporary: false,
-                isPasswordSet : isPasswordSet ,
-                isLoginGoogle : isLoginGoogle,
-                googleId : req.body.googleId,
-                avartar : req.body.avartar,
+                isPasswordSet: isPasswordSet,
+                isLoginGoogle: isLoginGoogle,
+                googleId: req.body.googleId,
+                avartar: req.body.avartar,
 
             }
-        const newUser = new UserModel(data)
-        await newUser.save()
-        if (newUser) {
-            const token = jwt.sign({
-                id: newUser._id,
-                role: newUser.role,
-                email: newUser.email,
-                gender: newUser.gender || '' ,
-                phone: newUser.phone || '',
-                birthday: newUser.birthday || '',
-                username: newUser.username,
-                last_login : Date.now(),
-                isLoginGoogle : isLoginGoogle,
-                googleId : newUser.googleId,
-                avartar : newUser.avartar,
-            }, process.env.JWT_SECRET);  
-           
-            
-            res.cookie('token', token, {
-                httpOnly: true,
-                secure: false,
-            }).json({
-                success: true,
-                message: 'Đăng ký tài khoản thành công'
-            })
-        }}
-        
-        else  {
+            const newUser = new UserModel(data)
+            await newUser.save()
+            if (newUser) {
+                const token = jwt.sign({
+                    id: newUser._id,
+                    role: newUser.role,
+                    email: newUser.email,
+                    gender: newUser.gender || '',
+                    phone: newUser.phone || '',
+                    birthday: newUser.birthday || '',
+                    username: newUser.username,
+                    last_login: Date.now(),
+                    isLoginGoogle: isLoginGoogle,
+                    googleId: newUser.googleId,
+                    avartar: newUser.avartar,
+                }, process.env.JWT_SECRET);
+
+
+                res.cookie('token', token, {
+                    httpOnly: true,
+                    secure: false,
+                }).json({
+                    success: true,
+                    message: 'Đăng ký tài khoản thành công'
+                })
+            }
+        }
+
+        else {
             res.status(403).json({
                 success: false,
                 message: "Vui lý đăng ký tài khoản trên trang web. Sai phương thức đăng kí"
@@ -87,8 +88,8 @@ const register = async (req, res) => {
         })
     }
 }
-const login = async (req, res , next) => {
-    const { email, password , isLoginGoogle } = req.body;
+const login = async (req, res, next) => {
+    const { email, password, isLoginGoogle } = req.body;
     try {
 
         const user = await UserModel.findOne({ email })
@@ -99,7 +100,7 @@ const login = async (req, res , next) => {
                 message: "Tài khoản Email không tồn tại"
             })
         }
-        if (user?.countBlock >  3 || user?.isBlocked === true) {
+        if (user?.countBlock > 3 || user?.isBlocked === true) {
             user.isBlocked = true
             await user.save()
             return res.json({
@@ -107,7 +108,7 @@ const login = async (req, res , next) => {
                 message: "Tài khoản bị block "
             })
         }
-        
+
         if (isLoginGoogle !== true) {
             const passwordMath = await bcrypt.compare(password, user.password)
             if (!passwordMath) {
@@ -117,11 +118,11 @@ const login = async (req, res , next) => {
                 })
             };
         }
-       
-      
+
+
         user.last_login = Date.now()
         await user.save()
-        
+
         const token = jwt.sign({
             id: user._id,
             role: user.role,
@@ -130,14 +131,17 @@ const login = async (req, res , next) => {
             phone: user.phone,
             birthday: user.birthday,
             username: user.username,
-            last_login : Date.now(),
-            coin : user.coin,
-            avartar : user?.avartar || null,
+            last_login: Date.now(),
+            coin: user.coin,
+            avartar: user?.avartar || null,
         }, process.env.JWT_SECRET)
-        
-        res.cookie('token', token , {
+
+        res.cookie('token', token, {
             httpOnly: true,
             secure: false,
+            domain: '.onrender.com',
+            sameSite: 'None',
+            path: '/',
         }).json({
             success: true,
             message: 'Đăng nhập thành công',
@@ -149,7 +153,7 @@ const login = async (req, res , next) => {
                 phone: user.phone,
                 birthday: user.birthday,
                 username: user.username,
-                avartar : user?.avartar || null,
+                avartar: user?.avartar || null,
             }
         })
 
