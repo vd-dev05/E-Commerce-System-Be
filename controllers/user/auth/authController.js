@@ -66,7 +66,10 @@ const register = async (req, res) => {
 
                 res.cookie('token', token, {
                     httpOnly: true,
-                    secure: false,
+                    secure: true,
+                    domain: 'be-ecom-system.onrender.com',
+                    sameSite: 'None',
+                    path: '/'
                 }).json({
                     success: true,
                     message: 'Đăng ký tài khoản thành công'
@@ -138,7 +141,7 @@ const login = async (req, res, next) => {
 
         res.cookie('token', token, {
             httpOnly: true,
-            secure: true, 
+            secure: true,
             domain: 'be-ecom-system.onrender.com',
             sameSite: 'None',
             path: '/',
