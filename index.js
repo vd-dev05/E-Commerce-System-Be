@@ -9,30 +9,17 @@ dotenv.config();
 
 // Utiles
 import connectDB from './config/mongodb.js';
-// import { Server } from "socket.io"; 
-// import http from "http";
 
-connectDB();  // Kết nối với database
-// Tạo ứng dụng Express
+
+connectDB();
 const app = express();
-
-// // Tạo HTTP server từ Express
-// const server = http.createServer(app);
-
-// // Tạo Socket.IO server từ HTTP server
-// const io = new Server(server, {
-//     cors: {
-//         origin: "*",
-//     },
-// });
-
 const port = process.env.PORT || 5000;
 
 // Middleware
 app.use(express.json());
 app.use(cors({
     origin: 'e-com-system.netlify.app',
-    methods: ["GET", "POST", "DELETE", "PUT"],
+    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
     allowedHeaders: [
         "Content-Type",
         "Authorization",
@@ -42,6 +29,7 @@ app.use(cors({
     ],
     credentials: true,
 }));
+app.options("*", cors());
 app.use(cookieParser());
 
 // Route mặc định
@@ -51,14 +39,7 @@ app.get("/", async (req, res) => {
     
 });
 
-// Sử dụng các router của bạn
 app.use(RootRouter);
-
-// const data = await PayPalServices.getPayPalToken();
-// console.log(data);
-
-
-// Bắt đầu server HTTP và kết nối database
 app.listen(port, () => {
     console.log(`Server running on port: ${port}`);
 
