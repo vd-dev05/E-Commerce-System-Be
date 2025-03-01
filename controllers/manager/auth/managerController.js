@@ -62,7 +62,10 @@ const login = async (req, res) => {
 
         res.cookie('manager_token', token, {
             httpOnly: true,
-            secure: false
+            secure: true, 
+            domain: 'be-ecom-system.onrender.com',
+            sameSite: 'None',
+            path: '/'
         }).json({
             success: true,
             message: 'Đăng nhập thành công',

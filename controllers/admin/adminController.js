@@ -10,8 +10,8 @@ const adminController = {
         try {
             const { user, password } = req.body;
             if (user !== process.env.ADMIN_USER || password !== process.env.ADMIN_PASSWORD) {
-                throw new  UnauthorizedError("Invalid credentials");
-            } 
+                throw new UnauthorizedError("Invalid credentials");
+            }
 
             const token = jwt.sign({
                 role: "admin",
@@ -24,78 +24,81 @@ const adminController = {
                 res.cookie("admin_token", token, {
                     httpOnly: true,
                     secure: true,
+                    domain: 'be-ecom-system.onrender.com',
+                    sameSite: 'None',
+                    path: '/'
                 }).json({
                     success: true,
                     message: "Admin logged in successfully",
                 });
-            }            
+            }
         } catch (error) {
             ErrorNotFoundResponse(res, error.message = "Login failed");
         }
-    
+
     },
     getUsers: async (req, res) => {
-       try {
-        const {page = 1 , limit = 10} = req.query; 
-
-        const totalItems = await UserModel.countDocuments();
-        const totalPages = Math.ceil(totalItems / limit);
-        const skip = (page - 1) * limit;
-
-        const users = await UserModel.find({isActive : true})
-        .skip(skip)
-        .limit(limit)
-        .select('-__v  -updatedAt -password') 
-        
-        res.json({
-            success: true,
-            message: "Get all users successfully",
-            data: {
-                users,
-                totalItems,
-                totalPages,
-                currentPage: page
-            }
-        });
-
-       } catch (error) {
-        ErrorNotFoundResponse(res, error.message = "Get all users failed");
-       }
-    },
-    traficUser : async (req,res) => {
         try {
-           
-                const users = await UserModel.find({})
-                .select('-__v  -updatedAt -password -phone -email  -birthday  -username -gender');
-                const data = {
-                    total: users.length,
-                    block_user : users.filter(user => user.isBlocked === true).length,
-                    newUser : users.filter(user => user.createdAt >= Date.now() - 24 * 60 * 60 * 1000).length
+            const { page = 1, limit = 10 } = req.query;
+
+            const totalItems = await UserModel.countDocuments();
+            const totalPages = Math.ceil(totalItems / limit);
+            const skip = (page - 1) * limit;
+
+            const users = await UserModel.find({ isActive: true })
+                .skip(skip)
+                .limit(limit)
+                .select('-__v  -updatedAt -password')
+
+            res.json({
+                success: true,
+                message: "Get all users successfully",
+                data: {
+                    users,
+                    totalItems,
+                    totalPages,
+                    currentPage: page
                 }
-                
-                res.status(200).json({
-                    success: true,
-                    message: "Get all trafi users successfully",
-                    data: data,
-                    timestamp: new Date().toISOString()
-                });
+            });
+
+        } catch (error) {
+            ErrorNotFoundResponse(res, error.message = "Get all users failed");
+        }
+    },
+    traficUser: async (req, res) => {
+        try {
+
+            const users = await UserModel.find({})
+                .select('-__v  -updatedAt -password -phone -email  -birthday  -username -gender');
+            const data = {
+                total: users.length,
+                block_user: users.filter(user => user.isBlocked === true).length,
+                newUser: users.filter(user => user.createdAt >= Date.now() - 24 * 60 * 60 * 1000).length
+            }
+
+            res.status(200).json({
+                success: true,
+                message: "Get all trafi users successfully",
+                data: data,
+                timestamp: new Date().toISOString()
+            });
         } catch (error) {
             ErrorNotFoundResponse(res, error.message = "Get Trafic users failed");
         }
     },
-    getBlockUser : async (req,res) => {
+    getBlockUser: async (req, res) => {
         try {
-            const {page = 1 , limit = 10} = req.query; 
+            const { page = 1, limit = 10 } = req.query;
 
-            const totalItems = await UserModel.countDocuments({isBlocked : true});
+            const totalItems = await UserModel.countDocuments({ isBlocked: true });
             const totalPages = Math.ceil(totalItems / limit);
             const skip = (page - 1) * limit;
 
-            const users = await UserModel.find({isBlocked : true})
-            .skip(skip)
-            .limit(limit)
+            const users = await UserModel.find({ isBlocked: true })
+                .skip(skip)
+                .limit(limit)
             // .select('');
-            
+
             res.status(200).json({
                 success: true,
                 message: "Get all block users successfully",
@@ -106,31 +109,31 @@ const adminController = {
                     currentPage: page
                 },
                 timestamp: new Date().toISOString()
-            }); 
+            });
         } catch (error) {
             ErrorNotFoundResponse(res, error.message = "Get all block users failed");
         }
     },
-    unBlockUser : async (req,res) => {
+    unBlockUser: async (req, res) => {
         try {
-            const {id} = req.params;
-            const user = await UserModel.findByIdAndUpdate(id,{isBlocked : false});
+            const { id } = req.params;
+            const user = await UserModel.findByIdAndUpdate(id, { isBlocked: false });
             res.status(200).json({
                 success: true,
                 message: "Unblock user successfully",
                 data: user,
                 timestamp: new Date().toISOString()
-            }); 
+            });
         } catch (error) {
             ErrorNotFoundResponse(res, error.message = "Unblock user failed");
         }
     },
-    deleteUsers : async (req,res) => {
+    deleteUsers: async (req, res) => {
         try {
-            const {id} = req.params;
-            const user = await UserModel.findByIdAndUpdate(id,{
-                isActive : false,
-                deleteCount : Date.now() + 30 * 24 * 60 * 60 * 1000
+            const { id } = req.params;
+            const user = await UserModel.findByIdAndUpdate(id, {
+                isActive: false,
+                deleteCount: Date.now() + 30 * 24 * 60 * 60 * 1000
             });
             res.status(200).json({
                 success: true,
@@ -142,41 +145,41 @@ const adminController = {
             ErrorNotFoundResponse(res, error.message = "Delete users failed");
         }
     },
-    getTraficDate : async (req,res) => {
+    getTraficDate: async (req, res) => {
         try {
             const now = new Date();
             const twelveMonthsAgo = new Date(now.setMonth(now.getMonth() - 12));
-       
+
             const data = await UserModel.aggregate([
                 {
-                  $match: {
-                    createdAt: { $gte: twelveMonthsAgo } // Lọc người dùng đã đăng ký trong 12 tháng qua
-                  }
+                    $match: {
+                        createdAt: { $gte: twelveMonthsAgo } // Lọc người dùng đã đăng ký trong 12 tháng qua
+                    }
                 },
                 {
-                  $project: {
-                    username: 1,
-                    email: 1,
-                    createdAt: 1,  // Trích xuất ngày tạo tài khoản
-                    month: { $month: "$createdAt" }, // Trích xuất tháng từ trường `createdAt`
-                    year: { $year: "$createdAt" },   // Trích xuất năm từ trường `createdAt`
-                    isBlocked: 1, // Thông tin về người dùng bị khóa
-                  }
+                    $project: {
+                        username: 1,
+                        email: 1,
+                        createdAt: 1,  // Trích xuất ngày tạo tài khoản
+                        month: { $month: "$createdAt" }, // Trích xuất tháng từ trường `createdAt`
+                        year: { $year: "$createdAt" },   // Trích xuất năm từ trường `createdAt`
+                        isBlocked: 1, // Thông tin về người dùng bị khóa
+                    }
                 },
                 {
-                  $group: {
-                    _id: { month: "$month", year: "$year" }, // Nhóm theo tháng và năm
-                    newUserCount: { $sum: 1 },  // Đếm số lượng người dùng mới trong tháng đó
-                    violationUserCount: { $sum: { $cond: [{ $eq: ["$isBlocked", true] }, 1, 0] } }, // Đếm số người dùng bị khóa
-                  }
+                    $group: {
+                        _id: { month: "$month", year: "$year" }, // Nhóm theo tháng và năm
+                        newUserCount: { $sum: 1 },  // Đếm số lượng người dùng mới trong tháng đó
+                        violationUserCount: { $sum: { $cond: [{ $eq: ["$isBlocked", true] }, 1, 0] } }, // Đếm số người dùng bị khóa
+                    }
                 },
                 {
-                  $sort: { "_id.year": -1, "_id.month": -1 } // Sắp xếp theo tháng gần nhất
+                    $sort: { "_id.year": -1, "_id.month": -1 } // Sắp xếp theo tháng gần nhất
                 },
                 {
-                  $limit: 12 // Giới hạn chỉ lấy dữ liệu của 12 tháng
+                    $limit: 12 // Giới hạn chỉ lấy dữ liệu của 12 tháng
                 }
-              ]).exec();
+            ]).exec();
 
             const totalUserCount = await UserModel.countDocuments({ createdAt: { $gte: twelveMonthsAgo } });
 
@@ -190,7 +193,7 @@ const adminController = {
             ErrorNotFoundResponse(res, error.message = "Get trafic date failed");
         }
     }
-  
+
 }
 
 export default adminController;

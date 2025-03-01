@@ -16,6 +16,7 @@ const app = express();
 const port = process.env.PORT || 5000;
 
 // Middleware
+app.use(cookieParser());
 app.use(express.json());
 app.use((req, res, next) => {
     res.setHeader('Access-Control-Allow-Origin', 'https://e-com-system.netlify.app');
@@ -42,7 +43,7 @@ app.use((req, res, next) => {
 //     credentials: true,
 // }));
 // app.options("*", cors());
-app.use(cookieParser());
+
 
 // Route mặc định
 app.get("/", async (req, res) => {
