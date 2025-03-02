@@ -187,7 +187,9 @@ const logout = (req, res) => {
 const checkAuth = (req, res) => {
     try {
         const user = req.user;
-        res.json({
+        console.log(user);
+        
+        res.status(200).json({
             success: true,
             message: 'Authenticated user !',
             user
